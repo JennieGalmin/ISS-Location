@@ -10,40 +10,56 @@ let vel = document.getElementById("vel");
 async function ISSLocation(){
     let response = await fetch("https://api.wheretheiss.at/v1/satellites/25544");
     let data = await response.json();
-    console.log(data);
+    //console.log(data);
 
 //Getting the data to HTML
 lat.innerText = data.latitude;
 long.innerText = data.longitude;
 alt.innerText = data.altitude;
 vel.innerText = data.velocity;
+
+return {lat:data.latitude, lng:data.longitude};
 }
 
-ISSLocation();
+//ISSLocation();
 
-//API for google map
 
-let map;
 
-async function initMap(){
+
+
+function initMap(){
 let bettna = {lat: 58.540, lng:16.375};
-map = new google.maps.Map(document.getElementById("map"), {
+let map = new google.maps.Map(document.getElementById("map"), {
     zoom: 4,
-    center: bettna,
-   
+    center: bettna
+})
 
-});
+return map;
 
-let marker = new google.maps.Marker({
-    map:map,
-    position: bettna,
-    title: "bettna"
-});
 }
-/*let map = new google.maps.Map(
-    document.getElementById("map"), {zoom:  4, center:bettna}
-)
-let marker = new google.maps.Marker({position:bettna, map:map})
-};*/
+let map = initMap()
 
-initMap()
+function initMarker(map){
+let marker = new google.maps.Marker({map:map});
+
+return marker;
+}
+
+let marker = initMarker(map)
+
+
+
+async function markerPosition(coords, marker){
+    let newPosition = await coords;
+    marker.getMap().setCenter(newPosition);
+    marker.setPosition(newPosition);
+}
+
+
+markerPosition(ISSLocation(), marker);
+
+setInterval( () => {
+markerPosition(ISSLocation(), marker);
+}, 10000)
+
+
